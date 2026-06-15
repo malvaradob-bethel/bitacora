@@ -245,6 +245,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <div class="header-actions">
     <button class="hdr-add" onclick="openForm()"><i data-lucide="plus"></i> <span>Nuevo</span></button>
     <button class="icon-btn" id="sync-btn" onclick="syncAll()" title="Sincronizar con Google Sheets"><i data-lucide="cloud"></i></button>
+    <button class="icon-btn" onclick="openCorreo()" title="Correo"><i data-lucide="mail"></i></button>
     <button class="icon-btn" onclick="openConfig()" title="Configuración"><i data-lucide="settings"></i></button>
     <button class="icon-btn" onclick="exportBackup()" title="Exportar backup"><i data-lucide="download"></i></button>
     <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importar backup"><i data-lucide="upload"></i></button>
@@ -361,18 +362,6 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <h3><i data-lucide="settings"></i> Configuración</h3>
 
     <div class="section-head" style="margin-top:6px">
-      <h3><i data-lucide="users"></i> Bloques de destinatarios</h3>
-      <button class="btn btn-sm btn-ghost" onclick="addBloque()"><i data-lucide="plus" style="width:16px;height:16px"></i> Bloque</button>
-    </div>
-    <div id="bloques-list"></div>
-
-    <div class="section-head">
-      <h3><i data-lucide="mail"></i> Modelos de correo</h3>
-      <button class="btn btn-sm btn-ghost" onclick="addModelo()"><i data-lucide="plus" style="width:16px;height:16px"></i> Modelo</button>
-    </div>
-    <div id="modelos-list"></div>
-
-    <div class="section-head">
       <h3><i data-lucide="pen-line"></i> Firma</h3>
     </div>
     <div class="card">
@@ -408,6 +397,30 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 
     <div class="sheet-actions">
       <button class="btn btn-primary" onclick="closeConfig()"><i data-lucide="check"></i> Listo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANEL: CORREO ===== -->
+<div class="overlay" id="correo-overlay" onclick="if(event.target===this)closeCorreo()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3><i data-lucide="mail"></i> Correo</h3>
+
+    <div class="section-head" style="margin-top:6px">
+      <h3><i data-lucide="users"></i> Bloques de destinatarios</h3>
+      <button class="btn btn-sm btn-ghost" onclick="addBloque()"><i data-lucide="plus" style="width:16px;height:16px"></i> Bloque</button>
+    </div>
+    <div id="bloques-list"></div>
+
+    <div class="section-head">
+      <h3><i data-lucide="file-text"></i> Modelos de correo</h3>
+      <button class="btn btn-sm btn-ghost" onclick="addModelo()"><i data-lucide="plus" style="width:16px;height:16px"></i> Modelo</button>
+    </div>
+    <div id="modelos-list"></div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-primary" onclick="closeCorreo()"><i data-lucide="check"></i> Listo</button>
     </div>
   </div>
 </div>
@@ -464,6 +477,13 @@ Agradeceré tomar conocimiento de esta programación.
 Gracias.
 {firma}`;
 
+const TARDANZA_DEFAULT = `Dios les bendiga.
+
+Por medio de la presente reconozco mi tardanza del día de hoy {hoy} y ofrezco una disculpa por cualquier inconveniente ocasionado. Compensaré el tiempo correspondiente saliendo un poco más tarde.
+
+Gracias por su comprensión.
+{firma}`;
+
 let DB = JSON.parse(localStorage.getItem('bitacora_db') || 'null');
 if(!DB){
   DB = {
@@ -478,6 +498,16 @@ if(!DB){
   save();
 }
 if(!DB.config.sync) DB.config.sync = { url:'', auto:true, last:'' };
+// migración única: modelo de ejemplo "Justificación de tardanza" (tipo general)
+if(!DB.config._seedTardanza){
+  DB.config.modelos.push({
+    id:'m_tard', nombre:'Justificación de tardanza', tipo:'general',
+    bloqueId: (DB.config.bloques[0] && DB.config.bloques[0].id) || '',
+    asunto:'JUSTIFICACIÓN DE TARDANZA {hoy}', cuerpo: TARDANZA_DEFAULT
+  });
+  DB.config._seedTardanza = true;
+  save();
+}
 let form = { riesgo:'Bajo', estado:'FIN', etapa:[], personal:[] };
 
 function save(){ localStorage.setItem('bitacora_db', JSON.stringify(DB)); }
@@ -550,7 +580,7 @@ function uid(p){ return p + Date.now().toString(36) + Math.floor(Math.random()*9
 
 /* ====== NAV ====== */
 function closeAllOverlays(){
-  ['form-overlay','config-overlay','mail-overlay','confirm-overlay'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  ['form-overlay','config-overlay','correo-overlay','mail-overlay','confirm-overlay'].forEach(id=>document.getElementById(id).classList.remove('show'));
   confirmCb=null;
   document.querySelectorAll('.ms-drop').forEach(d=>d.style.display='none');
 }
@@ -573,6 +603,16 @@ function closeConfig(){
   document.getElementById('config-overlay').classList.remove('show');
   document.querySelectorAll('.ms-drop').forEach(d=>d.style.display='none');
 }
+function openCorreo(){
+  closeAllOverlays();
+  try{ renderCorreo(); }catch(e){ console.error(e); }
+  document.getElementById('correo-overlay').classList.add('show');
+}
+function closeCorreo(){
+  document.getElementById('correo-overlay').classList.remove('show');
+  document.querySelectorAll('.ms-drop').forEach(d=>d.style.display='none');
+}
+function renderCorreo(){ renderBloques(); renderModelos(); }
 
 /* ====== FORM ====== */
 function autoLoc(){ document.getElementById('f-locacion').value = LOC[document.getElementById('f-plataforma').value] || ''; }
@@ -673,7 +713,7 @@ function recCard(r){
   const eBadge=r.estado==='PGM'?'tag-pgm':'tag-fin';
   const coments=(r.comentarios||[]).map(c=>`<div class="comment"><b>${c.fecha}</b> · ${c.texto}</div>`).join('');
   const etapas=(r.etapa||[]).map(e=>`<span class="tag tag-etapa">${e}</span>`).join('');
-  const mailBtns = DB.config.modelos.map(m=>{
+  const mailBtns = DB.config.modelos.filter(m=>modeloTipo(m)==='registro').map(m=>{
     const bloque=DB.config.bloques.find(b=>b.id===m.bloqueId);
     const ok=bloque && (bloque.to||[]).some(x=>x.trim());
     return `<button class="mail-btn ${ok?'':'disabled'}" onclick="openMail('${r.id}','${m.id}')" title="${ok?'':'Sin destinatarios'}"><i data-lucide="mail" style="width:14px;height:14px"></i> ${m.nombre}</button>`;
@@ -759,7 +799,6 @@ function renderConfig(){
   document.getElementById('cfg-firma').value = DB.config.firma||'';
   document.getElementById('cfg-syncurl').value = s.url||'';
   document.getElementById('sw-auto').classList.toggle('on', !!s.auto);
-  renderBloques(); renderModelos();
 }
 function toggleAuto(e){
   if(e) e.preventDefault();
@@ -821,25 +860,41 @@ function delBloque(id){
 }
 
 /* ====== CONFIG: MODELOS ====== */
-function modeloSummary(m){ const b=DB.config.bloques.find(x=>x.id===m.bloqueId); return b? '→ '+b.nombre : '→ (sin bloque)'; }
+const VARS_REGISTRO = ['{plataforma}','{fecha}','{horario}','{inicio}','{fin}','{personal}','{asunto}','{locacion}','{impacto}','{etapa}','{riesgo}','{hoy}','{firma}'];
+const VARS_GENERAL  = ['{hoy}','{hora}','{firma}'];
+function modeloTipo(m){ return m.tipo==='general' ? 'general' : 'registro'; }
+function modeloSummary(m){
+  if(modeloTipo(m)==='general'){ const b=DB.config.bloques.find(x=>x.id===m.bloqueId); return 'General'+(b?' · '+b.nombre:''); }
+  const b=DB.config.bloques.find(x=>x.id===m.bloqueId); return b? '→ '+b.nombre : '→ (sin bloque)';
+}
 function renderModelos(){
   const el=document.getElementById('modelos-list');
-  if(!DB.config.modelos.length){ el.innerHTML='<div class="empty"><i data-lucide="mail"></i><p>Sin modelos de correo.</p></div>'; lucide.createIcons(); return; }
+  if(!DB.config.modelos.length){ el.innerHTML='<div class="empty"><i data-lucide="file-text"></i><p>Sin modelos de correo.</p></div>'; lucide.createIcons(); return; }
   const optsBloque=b=>DB.config.bloques.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${x.nombre}</option>`).join('');
   el.innerHTML = DB.config.modelos.map(m=>{
     const open=!!cfgOpen[m.id];
+    const tipo=modeloTipo(m);
+    const vars=(tipo==='general'?VARS_GENERAL:VARS_REGISTRO).map(v=>`<code>${v}</code>`).join(' ');
+    const icono = tipo==='general' ? 'megaphone' : 'clipboard-list';
     return `<div class="cfg-block">
       <div class="cfg-head" onclick="toggleModelo('${m.id}')">
-        <div class="cfg-head-left"><i data-lucide="mail"></i><span class="cfg-title-text">${m.nombre||'(sin nombre)'}</span></div>
+        <div class="cfg-head-left"><i data-lucide="${icono}"></i><span class="cfg-title-text">${m.nombre||'(sin nombre)'}</span></div>
         <div class="cfg-head-right"><span class="cfg-summary">${modeloSummary(m)}</span><i data-lucide="chevron-down" class="cfg-chevron ${open?'open':''}"></i></div>
       </div>
       <div class="cfg-body" style="display:${open?'block':'none'}">
         <div class="field"><label>Nombre del modelo</label><input type="text" value="${(m.nombre||'').replace(/"/g,'&quot;')}" oninput="setModelo('${m.id}','nombre',this.value)"></div>
-        <div class="field"><label>Enviar al bloque</label><select onchange="setModelo('${m.id}','bloqueId',this.value)">${optsBloque(m.bloqueId)}</select></div>
-        <div class="field"><label>Asunto</label><input type="text" value="${m.asunto.replace(/"/g,'&quot;')}" oninput="setModelo('${m.id}','asunto',this.value)"></div>
-        <div class="field" style="margin-bottom:0"><label>Cuerpo del correo</label><textarea style="min-height:160px" oninput="setModelo('${m.id}','cuerpo',this.value)">${m.cuerpo}</textarea>
-          <div class="var-hint">Variables: <code>{plataforma}</code> <code>{fecha}</code> <code>{horario}</code> <code>{inicio}</code> <code>{fin}</code> <code>{personal}</code> <code>{asunto}</code> <code>{locacion}</code> <code>{impacto}</code> <code>{etapa}</code> <code>{riesgo}</code> <code>{firma}</code></div>
+        <div class="field"><label>Tipo</label>
+          <select onchange="setModelo('${m.id}','tipo',this.value);renderModelos()">
+            <option value="registro" ${tipo==='registro'?'selected':''}>Para registros (aparece en cada registro)</option>
+            <option value="general" ${tipo==='general'?'selected':''}>General (envío directo, sin registro)</option>
+          </select>
         </div>
+        <div class="field"><label>Enviar al bloque</label><select onchange="setModelo('${m.id}','bloqueId',this.value)"><option value="">(elige un bloque)</option>${optsBloque(m.bloqueId)}</select></div>
+        <div class="field"><label>Asunto</label><input type="text" value="${(m.asunto||'').replace(/"/g,'&quot;')}" oninput="setModelo('${m.id}','asunto',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>Cuerpo del correo</label><textarea style="min-height:160px" oninput="setModelo('${m.id}','cuerpo',this.value)">${m.cuerpo||''}</textarea>
+          <div class="var-hint">Variables: ${vars}</div>
+        </div>
+        ${tipo==='general' ? `<button class="btn btn-success btn-sm" style="width:100%;margin-top:12px" onclick="openMail('','${m.id}')"><i data-lucide="send" style="width:15px;height:15px"></i> Redactar y enviar</button>` : ''}
         <div class="cfg-foot">
           <button class="btn btn-ghost btn-sm" onclick="delModelo('${m.id}')"><i data-lucide="trash-2" style="width:15px;height:15px"></i> Eliminar</button>
           <button class="btn btn-primary btn-sm" onclick="guardarModelo('${m.id}')"><i data-lucide="check" style="width:15px;height:15px"></i> Guardar</button>
@@ -855,7 +910,7 @@ function setModelo(id,campo,v){ DB.config.modelos.find(m=>m.id===id)[campo]=v; s
 function addModelo(){
   const bId = DB.config.bloques[0]?.id || '';
   const id=uid('m');
-  DB.config.modelos.push({id,nombre:'Nuevo modelo',bloqueId:bId,asunto:'[{plataforma}] {asunto} — {fecha}',cuerpo:CUERPO_DEFAULT});
+  DB.config.modelos.push({id,nombre:'Nuevo modelo',tipo:'registro',bloqueId:bId,asunto:'[{plataforma}] {asunto} — {fecha}',cuerpo:CUERPO_DEFAULT});
   cfgOpen[id]=true; save(); renderModelos();
 }
 function delModelo(id){
@@ -958,12 +1013,17 @@ async function genFicha(id){
 /* ====== CORREO ====== */
 let mailData=null;
 function fillVars(txt,r){
+  r = r || {};
+  const ahora = new Date();
+  const hoy  = ahora.toLocaleDateString('es-PE');
+  const hora = ahora.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
   const horario=(r.inicio&&r.fin)?`de ${r.inicio} a ${r.fin}`:(r.inicio?`desde ${r.inicio}`:(r.fin?`hasta ${r.fin}`:'a coordinar'));
   const map={
-    '{plataforma}':r.plataforma||'','{fecha}':fmtDate(r.fecha),'{horario}':horario,
-    '{inicio}':r.inicio||'','{fin}':r.fin||'','{personal}':(r.personal||[]).join('\n')||'Por confirmar',
-    '{asunto}':r.asunto||'','{locacion}':r.locacion||'','{impacto}':r.impacto||'',
-    '{etapa}':(r.etapa||[]).join(', '),'{riesgo}':r.riesgo||'','{firma}':DB.config.firma||''
+    '{plataforma}':r.plataforma||'', '{fecha}':r.fecha?fmtDate(r.fecha):'', '{horario}':horario,
+    '{inicio}':r.inicio||'', '{fin}':r.fin||'', '{personal}':(r.personal||[]).join('\n')||(r.id?'Por confirmar':''),
+    '{asunto}':r.asunto||'', '{locacion}':r.locacion||'', '{impacto}':r.impacto||'',
+    '{etapa}':(r.etapa||[]).join(', '), '{riesgo}':r.riesgo||'',
+    '{hoy}':hoy, '{hora}':hora, '{firma}':DB.config.firma||''
   };
   return txt.replace(/\{[a-z]+\}/g, k=>map[k]!==undefined?map[k]:k);
 }
