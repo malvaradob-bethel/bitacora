@@ -1,5 +1,5 @@
 /* Service Worker — Bitácora PWA  (sube CACHE a v4, v5... cuando actualices index.html) */
-const CACHE = 'bitacora-v3';
+const CACHE = 'bitacora-v4';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
