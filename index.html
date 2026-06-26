@@ -492,6 +492,18 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     </div>
     <div id="modelos-list"></div>
 
+    <div class="section-head" style="margin-top:20px">
+      <h3><i data-lucide="save"></i> Respaldo de correo (JSON)</h3>
+    </div>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.55;margin:-2px 0 10px">
+      Guarda tus bloques y modelos en un archivo <code>correo-config.json</code>. Súbelo a tu repositorio (junto al <code>index.html</code>) y la app lo cargará sola al abrir — aunque borres los datos o actualices la versión.
+    </p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="exportCorreoJSON()"><i data-lucide="download"></i> Exportar JSON</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('correo-import').click()"><i data-lucide="upload"></i> Importar JSON</button>
+    </div>
+    <input type="file" id="correo-import" accept="application/json,.json" style="display:none" onchange="importCorreoJSON(this)">
+
     <div class="sheet-actions">
       <button class="btn btn-primary" onclick="closeCorreo()"><i data-lucide="check"></i> Listo</button>
     </div>
@@ -570,7 +582,9 @@ if(!DB){
   };
   save();
 }
-if(!DB.config.sync) DB.config.sync = { url:'', auto:true, last:'' };
+if(!DB.config.sync) DB.config.sync = { url:'https://script.google.com/macros/s/AKfycbx0JB9BCF8Trmgd_Yu3BsNzrji__Bq_XbRJh6FYc8GqXDgQIFJ7SEd7NyzIkI5v_AIFEQ/exec', auto:true, last:'' };
+// si quedó sin URL (datos viejos), rellenar con la predeterminada
+if(DB.config.sync && !DB.config.sync.url) DB.config.sync.url='https://script.google.com/macros/s/AKfycbx0JB9BCF8Trmgd_Yu3BsNzrji__Bq_XbRJh6FYc8GqXDgQIFJ7SEd7NyzIkI5v_AIFEQ/exec';
 // migración única: modelo de ejemplo "Justificación de tardanza" (tipo general)
 if(!DB.config._seedTardanza){
   DB.config.modelos.push({
@@ -686,6 +700,65 @@ function closeCorreo(){
   document.querySelectorAll('.ms-drop').forEach(d=>d.style.display='none');
 }
 function renderCorreo(){ renderBloques(); renderModelos(); }
+
+/* ====== RESPALDO DE CORREO EN JSON (bloques + modelos + firma) ====== */
+function exportCorreoJSON(){
+  const data={
+    version:Date.now(),
+    exportado:new Date().toISOString(),
+    firma:DB.config.firma||'',
+    syncUrl:(DB.config.sync&&DB.config.sync.url)||'',
+    bloques:DB.config.bloques||[],
+    modelos:DB.config.modelos||[]
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='correo-config.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('correo-config.json descargado','ok');
+}
+function aplicarCorreoConfig(data){
+  if(!data || typeof data!=='object') return false;
+  if(Array.isArray(data.bloques)) DB.config.bloques=data.bloques;
+  if(Array.isArray(data.modelos)) DB.config.modelos=data.modelos;
+  if(typeof data.firma==='string') DB.config.firma=data.firma;
+  if(typeof data.syncUrl==='string' && data.syncUrl){ getSync().url=data.syncUrl; }
+  if(data.version) DB.config._correoFileVersion=data.version;
+  return true;
+}
+function importCorreoJSON(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      aplicarCorreoConfig(JSON.parse(e.target.result));
+      save();
+      try{ renderCorreo(); }catch(_){}
+      try{ renderHist(); }catch(_){}
+      try{ lucide.createIcons(); }catch(_){}
+      toast('Modelos y grupos importados','ok');
+    }catch(err){ toast('Archivo JSON inválido','err'); }
+  };
+  reader.readAsText(file); input.value='';
+}
+/* Carga automática desde el repositorio al abrir.
+   Solo aplica si el archivo es más nuevo que lo ya aplicado (evita pisar ediciones locales). */
+async function cargarCorreoDesdeRepo(){
+  try{
+    const res=await fetch('./correo-config.json',{cache:'no-store'});
+    if(!res.ok) return;
+    const data=await res.json();
+    const fileV=data.version||0, localV=DB.config._correoFileVersion||0;
+    if(fileV>localV){
+      aplicarCorreoConfig(data);
+      save();
+      try{ renderCorreo(); }catch(_){}
+      try{ renderHist(); }catch(_){}
+      try{ lucide.createIcons(); }catch(_){}
+    }
+  }catch(_){ /* sin archivo o sin red: se usa lo guardado localmente */ }
+}
 
 /* ====== FORM ====== */
 function autoLoc(){ document.getElementById('f-locacion').value = LOC[document.getElementById('f-plataforma').value] || ''; }
@@ -1229,6 +1302,7 @@ function toast(msg,type){
   autoLoc();
   renderHist();
   lucide.createIcons();
+  cargarCorreoDesdeRepo();
 })();
 
 /* ====== PWA: registrar service worker ====== */
