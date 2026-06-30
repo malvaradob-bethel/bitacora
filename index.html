@@ -871,6 +871,7 @@ function recCard(r){
         <div class="rec-title">${r.asunto}</div>
       </div>
       <div class="rec-tools">
+        <button class="tool" onclick="llenarFormulario('${r.id}')" title="Llenar formulario de comisión"><i data-lucide="clipboard-list" style="width:17px;height:17px"></i></button>
         <button class="tool" onclick="genFicha('${r.id}')" title="Descargar ficha PNG"><i data-lucide="image-down" style="width:17px;height:17px"></i></button>
         <button class="tool" onclick="toggleEdit('${r.id}')"><i data-lucide="pencil" style="width:17px;height:17px"></i></button>
         <button class="tool del" onclick="delRecord('${r.id}')"><i data-lucide="trash-2" style="width:17px;height:17px"></i></button>
@@ -1064,6 +1065,35 @@ function delModelo(id){
   confirmAction('Eliminar modelo',`Se eliminará el modelo "${m.nombre}".`,()=>{
     DB.config.modelos=DB.config.modelos.filter(x=>x.id!==id); save(); renderModelos(); toast('Modelo eliminado','ok');
   });
+}
+
+/* ====== FORMULARIO DE COMISIONES (enlace precargado de Google Forms) ====== */
+const FORM_COMISION_URL='https://docs.google.com/forms/d/e/1FAIpQLSdxquJWqR2c0P0CI7Y9O1-z6CKVXpsE2KJMIbVnsRjeeDlS1g/viewform';
+function _dur(a,b){
+  if(!a||!b) return '';
+  const x=a.split(':').map(Number), y=b.split(':').map(Number);
+  if(x.length<2||y.length<2) return '';
+  let m=(y[0]*60+y[1])-(x[0]*60+x[1]); if(m<0) m+=1440;
+  const h=Math.floor(m/60), mm=m%60;
+  return ((h?h+' h ':'')+(mm?mm+' min':'')).trim()||'0 min';
+}
+function llenarFormulario(id){
+  const r=DB.records.find(x=>x.id===id); if(!r){ toast('Registro no encontrado','err'); return; }
+  const personal=(r.personal||[]).filter(Boolean);
+  const nombre=(DB.config.firma||'').split('\n')[0].trim() || personal[0] || '';
+  const motivo=(r.asunto||'')+(r.descripcion?'\n'+r.descripcion:'');
+  const p=new URLSearchParams(); p.set('usp','pp_url');
+  p.set('entry.855859017', nombre);                 // Nombre y apellidos completos
+  p.set('entry.1708157785','Unidad Técnica');        // Unidad a la que pertenece
+  p.set('entry.915667174', motivo);                  // Motivo de la salida
+  p.set('entry.1525764687', personal.join(', '));    // Personal que realizará la comisión
+  p.set('entry.813900473', r.locacion||'');          // Lugar al que se dirigirán
+  if(r.fecha){ const f=r.fecha.split('-'); if(f.length===3){ p.set('entry.428962002_year',f[0]); p.set('entry.428962002_month',String(+f[1])); p.set('entry.428962002_day',String(+f[2])); } }
+  if(r.inicio){ const t=r.inicio.split(':'); p.set('entry.1974344584_hour',String(+t[0])); p.set('entry.1974344584_minute',String(+t[1])); }
+  if(r.fin){ const t=r.fin.split(':'); p.set('entry.1021607764_hour',String(+t[0])); p.set('entry.1021607764_minute',String(+t[1])); }
+  const dur=_dur(r.inicio,r.fin); if(dur) p.set('entry.1647062368', dur);
+  p.set('entry.443325649', personal[0]||nombre);     // Responsable de la comisión
+  window.open(FORM_COMISION_URL+'?'+p.toString(), '_blank');
 }
 
 /* ====== FICHA PNG (Canvas) ====== */
