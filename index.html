@@ -1162,9 +1162,9 @@ async function genFicha(id){
     const mid=cx+wq/2;
     if(i===0) ctext(mid,cyc,r.id,FS(14,true),C.idTx);
     else if(i===1) pill(mid,cyc,r.plataforma,FS(13,true),C.platBg,C.platTx);
-    else if(i===2) mlines(cx,top,asun,FS(14,true),C.txt,wq,false);
+    else if(i===2) mlines(cx, yr+(rowH-asun.length*LH)/2, asun, FS(14,true),C.txt,wq,false);
     else if(i===3) mlines(cx,top,desc,FS(14,false),C.muted,wq,false);
-    else if(i===4) mlines(cx,top,imp,FS(14,false),C.txt,wq,true);
+    else if(i===4){ if(imp.length<=1){ ctext(mid,cyc,(r.impacto||'-'),FS(14,false),C.txt); } else { mlines(cx, yr+(rowH-imp.length*LH)/2, imp, FS(14,false),C.txt,wq,true); } }
     else if(i===5) ctext(mid,cyc,fmtDate(r.fecha),FS(14,false),C.txt);
     else if(i===6) ctext(mid,cyc,inicioTxt,FS(14,false),C.txt);
     else if(i===7) ctext(mid,cyc,finTxt,FS(14,false),C.txt);
