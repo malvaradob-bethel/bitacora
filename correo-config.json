@@ -1,0 +1,99 @@
+{
+  "version": 1782951416440,
+  "exportado": "2026-07-02T00:16:56.440Z",
+  "firma": "",
+  "syncUrl": "https://script.google.com/macros/s/AKfycbx0JB9BCF8Trmgd_Yu3BsNzrji__Bq_XbRJh6FYc8GqXDgQIFJ7SEd7NyzIkI5v_AIFEQ/exec",
+  "bloques": [
+    {
+      "id": "b1",
+      "nombre": "Coordinación",
+      "to": [
+        ""
+      ],
+      "cc": [
+        ""
+      ]
+    },
+    {
+      "id": "bmr0toqrf72",
+      "nombre": "RRHH",
+      "to": [
+        "amendoza@betheltv.tv",
+        "acarhuachin@betheltv.tv",
+        "talentohumano@betheltv.tv"
+      ],
+      "cc": [
+        "acueto@betheltv.tv",
+        "iarenas@betheltv.tv",
+        "abautista@betheltv.tv"
+      ]
+    },
+    {
+      "id": "bmr0tr5y5219",
+      "nombre": "Prueba ",
+      "to": [
+        "manuelalvarado2808@gmail.com"
+      ],
+      "cc": [
+        ""
+      ]
+    },
+    {
+      "id": "bmr2qqa8r95",
+      "nombre": "Producción ",
+      "to": [
+        "programaciontv@betheltv.tv",
+        "controlmaestro@betheltv.tv",
+        "dcondori@betheltv.tv",
+        "jpineda@betheltv.tv",
+        "ccueto@betheltv.tv",
+        "svargas@betheltv.tv"
+      ],
+      "cc": [
+        "acueto@betheltv.tv",
+        "abautista@betheltv.tv",
+        "iarenas@betheltv.tv",
+        "cramos@betheltv.tv",
+        "bagreda@betheltv.tv",
+        "bchaponan@betheltv.tv",
+        "mccama@betheltv.tv",
+        "jespiritu@betheltv.tv",
+        "mangeles@betheltv.tv",
+        "mlorenzo@betheltv.tv"
+      ]
+    }
+  ],
+  "modelos": [
+    {
+      "id": "m1",
+      "nombre": "Trabajos programados",
+      "bloqueId": "bmr0toqrf72",
+      "asunto": "[{plataforma}] Trabajos programados — {fecha}",
+      "cuerpo": "Dios les bendiga,\n\nPor medio de la presente informo que, como parte de los trabajos programados en {plataforma}, el equipo técnico estará realizando labores en el siguiente horario: {fecha}, {horario}.\n\nAgradeceré considerar las horas extras correspondientes, así como tener en cuenta esta programación en la asistencia del personal para el día siguiente.\n\nPersonal involucrado:\n{personal}\n\nAgradeceré tomar conocimiento de esta programación.\n\nGracias.\n{firma}"
+    },
+    {
+      "id": "m_tard",
+      "nombre": "Justificación de tardanza",
+      "tipo": "general",
+      "bloqueId": "bmr0toqrf72",
+      "asunto": "JUSTIFICACIÓN DE TARDANZA {hoy}",
+      "cuerpo": "Dios les bendiga.\n\nPor medio de la presente reconozco mi tardanza del día de hoy {hoy} y ofrezco una disculpa por cualquier inconveniente ocasionado. Compensaré el tiempo correspondiente saliendo un poco más tarde.\n\nGracias por su comprensión.\n{firma}"
+    },
+    {
+      "id": "mmr0ttrzk252",
+      "nombre": "Reg Salida ",
+      "tipo": "registro",
+      "bloqueId": "bmr0toqrf72",
+      "asunto": "COMISIÓN {plataforma} {fecha} - {asunto}",
+      "cuerpo": "REPORTE DE SALIDA \nPlataforma: {plataforma}\nMotivo: {asunto}\nDestino: {locacion}\nPersonal involucrado:\n{personal}\n\n"
+    },
+    {
+      "id": "mmr2q8asb357",
+      "nombre": "TV-CM",
+      "tipo": "registro",
+      "bloqueId": "bmr2qqa8r95",
+      "asunto": "CORTE DE SEÑAL {plataforma} - {asunto} - {fecha}",
+      "cuerpo": "Dios les bendiga,\nPor medio de la presente informo que, como parte de los trabajos programados en , se realizará un corte temporal de la señal {plataforma} por un espacio de 2 horas.\nEl equipo técnico estará realizando labores a partir del siguiente horario: 01/06/2026, de 9:00pm hasta el día siguiente {fin}\nPersonal involucrado:\n{personal} \nAgradeceré a Programación y Control Maestro considerar, la emisión de un mensaje tipo scroll en pantalla, con el siguiente contenido.\n\nCOMUNICADO:\nPor trabajos de mantenimiento técnico programado, la señal de TDT LIMA será interrumpida desde las 00:00 h por un espacio de 2 horas aproximadamente.\n\nAgradecemos su comprensión.\n\nQuedo atento a su coordinación para la correcta ejecución.\n\nGracias."
+    }
+  ]
+}
