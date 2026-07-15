@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d1216">
+<title>Técnica Bethel · Plataforma de Soporte Técnico</title>
+<style>
+  :root{
+    --bg:#0d1216;
+    --bg2:#121a20;
+    --panel:#161f27;
+    --panel2:#1b2630;
+    --line:#243240;
+    --txt:#dfe7ec;
+    --txt2:#8fa3b0;
+    --amber:#ffb020;
+    --cyan:#22d3ee;
+    --green:#34d399;
+    --red:#f87171;
+    --radius:12px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font-family:"Segoe UI",Roboto,system-ui,-apple-system,sans-serif;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  .mono{font-family:"Cascadia Mono","JetBrains Mono",Consolas,monospace}
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:linear-gradient(180deg,#101820 0%,#0d1216 100%);
+    border-bottom:1px solid var(--line);
+    padding:14px 18px 0;
+    position:sticky;top:0;z-index:50;
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding-bottom:12px}
+  .brand-logo{
+    width:42px;height:42px;border-radius:10px;flex:none;
+    background:radial-gradient(circle at 30% 30%,#1c2a35,#0d1216);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-logo svg{width:26px;height:26px}
+  .brand h1{font-size:1.05rem;letter-spacing:.04em;line-height:1.2}
+  .brand h1 b{color:var(--amber)}
+  .brand small{display:block;color:var(--txt2);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-left:auto;flex:none;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* ---------- TABS ---------- */
+  nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    flex:none;background:none;border:none;color:var(--txt2);
+    font:inherit;font-size:.82rem;letter-spacing:.02em;cursor:pointer;
+    padding:10px 14px;border-bottom:2px solid transparent;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;transition:color .15s;
+  }
+  nav button:hover{color:var(--txt)}
+  nav button.active{color:var(--amber);border-bottom-color:var(--amber)}
+  nav button:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px;border-radius:6px}
+
+  /* ---------- LAYOUT ---------- */
+  main{flex:1;width:100%;max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+  section{display:none;animation:fadeIn .25s ease}
+  section.visible{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{font-size:1.25rem;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  h2 .tag{font-size:.62rem;letter-spacing:.12em;color:var(--cyan);border:1px solid var(--cyan);border-radius:4px;padding:2px 6px;text-transform:uppercase}
+  .lead{color:var(--txt2);font-size:.9rem;margin-bottom:20px;max-width:640px}
+
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;display:flex;flex-direction:column;gap:8px;
+    transition:border-color .15s, transform .15s;
+  }
+  a.card{text-decoration:none;color:inherit;cursor:pointer}
+  a.card:hover{border-color:var(--amber);transform:translateY(-2px)}
+  .card .icon{width:38px;height:38px;border-radius:9px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+  .card h3{font-size:.95rem}
+  .card p{font-size:.8rem;color:var(--txt2);line-height:1.45}
+  .card .go{margin-top:auto;font-size:.75rem;color:var(--cyan);letter-spacing:.04em}
+  .badge{display:inline-block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+  .badge.ok{background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.35)}
+  .badge.soon{background:rgba(255,176,32,.1);color:var(--amber);border:1px solid rgba(255,176,32,.35)}
+
+  /* ---------- TABLAS TÉCNICAS ---------- */
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin:10px 0}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--txt2);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+  td.value{color:var(--cyan)}
+  .pending{color:var(--amber);font-style:italic}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .panel h3{font-size:.95rem;margin-bottom:10px;color:var(--amber);letter-spacing:.03em}
+  .panel p{font-size:.85rem;color:var(--txt2);line-height:1.55}
+
+  /* ---------- FORMULARIO ---------- */
+  form{display:flex;flex-direction:column;gap:12px;max-width:560px}
+  label{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2)}
+  input,select,textarea{
+    background:var(--bg2);border:1px solid var(--line);border-radius:8px;
+    color:var(--txt);font:inherit;font-size:.9rem;padding:10px 12px;width:100%;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan)}
+  textarea{resize:vertical;min-height:90px}
+  .btn{
+    background:var(--amber);color:#1a1204;border:none;border-radius:8px;
+    font:inherit;font-weight:700;font-size:.9rem;padding:12px 18px;cursor:pointer;
+    letter-spacing:.03em;transition:filter .15s;
+  }
+  .btn:hover{filter:brightness(1.1)}
+  .btn.alt{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+  .hint{font-size:.75rem;color:var(--txt2)}
+
+  footer{
+    border-top:1px solid var(--line);padding:16px 18px;text-align:center;
+    font-size:.72rem;color:var(--txt2);letter-spacing:.04em;
+  }
+  footer a{color:var(--cyan);text-decoration:none}
+
+  @media (max-width:520px){
+    main{padding:16px 14px 50px}
+    .grid{grid-template-columns:1fr 1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#ffb020" stroke-width="1.6" stroke-linecap="round">
+        <path d="M12 21v-8"/><path d="M12 13 5 6"/><path d="M12 13l7-7"/>
+        <path d="M8.5 9.5a5 5 0 0 1 7 0" stroke="#22d3ee"/>
+        <path d="M6.5 7.5a8 8 0 0 1 11 0" stroke="#22d3ee" opacity=".55"/>
+      </svg>
+    </div>
+    <h1><b>TÉCNICA</b> BETHEL
+      <small>Red Nacional Radio y Televisión · Unidad Técnica</small>
+    </h1>
+    <span class="live-dot" title="Plataforma en línea"></span>
+  </div>
+  <nav id="tabs" role="tablist"></nav>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  Unidad Técnica · Bethel Perú — Red nacional de radio y televisión ·
+  <a href="mailto:malvarado@betheltv.tv">malvarado@betheltv.tv</a>
+</footer>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   CONFIG — editar aquí los enlaces y datos. Todo lo marcado (por
+   confirmar) se completa después; el resto de la página no se toca.
+   ===================================================================== */
+const CONFIG = {
+  correoSoporte : "malvarado@betheltv.tv",
+  enlaces : {
+    estaciones : "https://malvaradob-bethel.github.io/estaciones/",
+    bitacora   : "https://malvaradob-bethel.github.io/bitacora/",
+    satfinder  : "#",   // URL del Dishpointer Bethel (por confirmar)
+    stbRemote  : "#",   // Landing del control remoto STB (por confirmar)
+    gpscam     : "https://malvaradob-bethel.github.io/gpscam/",
+    tecnicos   : "https://malvaradob-bethel.github.io/tecnicos/"
+  },
+  // Parámetros satelitales — completar con los valores oficiales vigentes
+  satelite : {
+    nombre       : "(por confirmar)",
+    posicion     : "(por confirmar)",
+    banda        : "(por confirmar)",
+    frecuencia   : "(por confirmar)",
+    polarizacion : "(por confirmar)",
+    symbolRate   : "(por confirmar)",
+    fec          : "(por confirmar)",
+    estandar     : "(por confirmar)",
+    modulacion   : "(por confirmar)"
+  }
+};
+
+/* =====================================================================
+   DEFINICIÓN DE PESTAÑAS
+   ===================================================================== */
+const TABS = [
+  { id:"home",       icon:"⌂",  label:"Home" },
+  { id:"estaciones", icon:"📡", label:"Estaciones (Red)" },
+  { id:"satelital",  icon:"🛰", label:"Señal Satelital" },
+  { id:"cable",      icon:"📺", label:"Cableoperadores" },
+  { id:"sintonia",   icon:"📝", label:"Reporta Sintonía" },
+  { id:"asistencia", icon:"🛠", label:"Asistencia Técnica" },
+  { id:"recursos",   icon:"🧭", label:"Recursos" },
+  { id:"descargas",  icon:"⬇",  label:"Descargas" }
+];
+
+/* =====================================================================
+   CONTENIDO DE CADA SECCIÓN
+   ===================================================================== */
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function pend(v){ return v.startsWith("(") ? '<span class="pending">'+esc(v)+'</span>' : '<span class="value mono">'+esc(v)+'</span>'; }
+
+const SECTIONS = {
+
+  home : () => `
+    <h2>Bienvenido <span class="tag">v1.0</span></h2>
+    <p class="lead">Plataforma técnica de la red Bethel: estado de la red de estaciones,
+    parámetros de señal, soporte a cableoperadores y herramientas de campo, todo en un solo lugar.</p>
+    <div class="grid">
+      ${TABS.slice(1).map(t=>`
+        <a class="card" href="#${t.id}">
+          <div class="icon">${t.icon}</div>
+          <h3>${t.label}</h3>
+          <p>${{
+            estaciones:"Monitoreo de la red nacional de estaciones de radio y TV.",
+            satelital:"Parámetros de sintonización del enlace satelital de Bethel TV.",
+            cable:"Información técnica para operadores de cable que retransmiten la señal.",
+            sintonia:"¿Problemas de recepción? Envíanos tu reporte de sintonía.",
+            asistencia:"Canales de contacto con la Unidad Técnica.",
+            recursos:"Herramientas de campo: Satfinder, GPS Cam y más.",
+            descargas:"Aplicaciones descargables: control remoto STB y utilidades."
+          }[t.id]}</p>
+          <span class="go">Abrir →</span>
+        </a>`).join("")}
+    </div>`,
+
+  estaciones : () => `
+    <h2>Estaciones de la Red <span class="tag">Nacional</span></h2>
+    <p class="lead">La red Bethel opera más de 320 estaciones de radio y televisión a nivel nacional.
+    Consulta el estado, cobertura y datos técnicos de cada estación en el panel de monitoreo.</p>
+    <div class="grid">
+      <a class="card" href="${CONFIG.enlaces.estaciones}" target="_blank" rel="noopener">
+        <div class="icon">📡</div>
+        <h3>Panel de Estaciones <span class="badge ok">En línea</span></h3>
+        <p>Mapa interactivo con estaciones de radio y TV, simulación de propagación RF,
+        cobertura ISDB-T y reportes de estado de red en PDF.</p>
+        <span class="go">Abrir panel →</span>
+      </a>
+      <div class="card">
+        <div class="icon">🗺</div>
+        <h3>Cobertura por región</h3>
+        <p>Resumen de cobertura departamental y listado de frecuencias por localidad.
+        Próximamente integrado en esta plataforma.</p>
+        <span class="badge soon">Próximamente</span>
+      </div>
+    </div>`,
+
+  satelital : () => `
+    <h2>Señal Satelital <span class="tag">Recepción</span></h2>
+    <p class="lead">Parámetros de sintonización para recibir la señal de Bethel Televisión
+    vía satélite. Verifica siempre estos valores antes de reapuntar o reconfigurar un receptor.</p>
+    <div class="panel">
+      <h3>Parámetros de sintonización</h3>
+      <table>
+        <tr><th>Satélite</th><td>${pend(CONFIG.satelite.nombre)}</td></tr>
+        <tr><th>Posición orbital</th><td>${pend(CONFIG.satelite.posicion)}</td></tr>
+        <tr><th>Banda</th><td>${pend(CONFIG.satelite.banda)}</td></tr>
+        <tr><th>Frecuencia</th><td>${pend(CONFIG.satelite.frecuencia)}</td></tr>
+        <tr><th>Polarización</th><td>${pend(CONFIG.satelite.polarizacion)}</td></tr>
+        <tr><th>Symbol rate</th><td>${pend(CONFIG.satelite.symbolRate)}</td></tr>
+        <tr><th>FEC</th><td>${pend(CONFIG.satelite.fec)}</td></tr>
+        <tr><th>Estándar</th><td>${pend(CONFIG.satelite.estandar)}</td></tr>
+        <tr><th>Modulación</th><td>${pend(CONFIG.satelite.modulacion)}</td></tr>
+      </table>
+      <p class="hint">Los valores marcados como "por confirmar" se actualizarán con los datos oficiales vigentes.</p>
+    </div>
+    <div class="panel">
+      <h3>Apuntamiento de antena</h3>
+      <p>Para calcular azimut, elevación y polarización de tu antena parabólica desde cualquier
+      punto del país, usa la herramienta <b>Satfinder Bethel</b> disponible en la pestaña
+      <a href="#recursos" style="color:var(--cyan)">Recursos</a>.</p>
+    </div>`,
+
+  cable : () => `
+    <h2>Cableoperadores <span class="tag">Retransmisión</span></h2>
+    <p class="lead">Información para operadores de cable que retransmiten la señal de Bethel
+    Televisión en sus grillas de programación.</p>
+    <div class="panel">
+      <h3>¿Cómo tomar la señal?</h3>
+      <p>La señal de Bethel Televisión puede tomarse desde el enlace satelital (ver pestaña
+      <a href="#satelital" style="color:var(--cyan)">Señal Satelital</a>) o desde la estación
+      terrestre más cercana de la red. Para coordinación técnica, autorización de retransmisión
+      y entrega de logos/artes oficiales, contáctanos por los canales de la pestaña
+      <a href="#asistencia" style="color:var(--cyan)">Asistencia Técnica</a>.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">📋</div>
+        <h3>Registro de cableoperador</h3>
+        <p>Formulario de registro para operadores que retransmiten la señal, para mantener
+        contacto directo ante cambios de parámetros.</p>
+        <span class="badge soon">Próximamente</span>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h3>Logos y artes oficiales</h3>
+        <p>Paquete descargable con el logotipo oficial de Bethel Televisión en alta
+        resolución para su grilla y material promocional.</p>
+        <span class="badge soon">Próximamente</span>
+      </div>
+    </div>`,
+
+  sintonia : () => `
+    <h2>Reporta tu Sintonía <span class="tag">Feedback</span></h2>
+    <p class="lead">¿Tienes problemas para recibir la señal de radio o TV en tu localidad?
+    ¿O quieres confirmarnos que la señal llega bien? Tu reporte nos ayuda a mantener la red.</p>
+    <form id="formSintonia">
+      <div><label for="fNombre">Nombre</label><input id="fNombre" required placeholder="Tu nombre"></div>
+      <div><label for="fCiudad">Ciudad / Localidad</label><input id="fCiudad" required placeholder="Ej. Huancayo, Junín"></div>
+      <div><label for="fMedio">Medio de recepción</label>
+        <select id="fMedio">
+          <option>TV abierta (antena)</option>
+          <option>TDT / ISDB-T</option>
+          <option>Cable</option>
+          <option>Satélite</option>
+          <option>Radio FM</option>
+          <option>Radio AM</option>
+          <option>Internet / Streaming</option>
+        </select>
+      </div>
+      <div><label for="fCanal">Canal o frecuencia</label><input id="fCanal" placeholder="Ej. Canal 29 UHF / 96.1 MHz"></div>
+      <div><label for="fEstado">Estado de la señal</label>
+        <select id="fEstado">
+          <option>Se recibe bien</option>
+          <option>Señal débil / intermitente</option>
+          <option>Sin señal</option>
+          <option>Problemas de audio</option>
+          <option>Problemas de video</option>
+        </select>
+      </div>
+      <div><label for="fDetalle">Detalle</label><textarea id="fDetalle" placeholder="Describe el problema o comentario..."></textarea></div>
+      <div class="btn-row">
+        <button type="submit" class="btn">Enviar reporte por correo</button>
+      </div>
+      <p class="hint">El reporte se enviará a la Unidad Técnica (${esc(CONFIG.correoSoporte)}) desde tu aplicación de correo.</p>
+    </form>`,
+
+  asistencia : () => `
+    <h2>Asistencia Técnica <span class="tag">Soporte</span></h2>
+    <p class="lead">Canales de contacto con la Unidad Técnica de Bethel para estaciones,
+    cableoperadores y personal de campo.</p>
+    <div class="grid">
+      <a class="card" href="mailto:${esc(CONFIG.correoSoporte)}">
+        <div class="icon">✉</div>
+        <h3>Correo de soporte</h3>
+        <p class="mono" style="color:var(--cyan)">${esc(CONFIG.correoSoporte)}</p>
+        <p>Consultas técnicas, coordinaciones de retransmisión y reportes formales.</p>
+        <span class="go">Escribir →</span>
+      </a>
+      <a class="card" href="${CONFIG.enlaces.bitacora}" target="_blank" rel="noopener">
+        <div class="icon">📓</div>
+        <h3>Bitácora Técnica <span class="badge ok">Interno</span></h3>
+        <p>Registro de incidencias y trabajos programados de la red (uso interno de la Unidad Técnica).</p>
+        <span class="go">Abrir →</span>
+      </a>
+      <a class="card" href="${CONFIG.enlaces.tecnicos}" target="_blank" rel="noopener">
+        <div class="icon">🧰</div>
+        <h3>Registro de Operaciones <span class="badge ok">Interno</span></h3>
+        <p>App de campo para técnicos: registro de intervenciones y operaciones en estaciones.</p>
+        <span class="go">Abrir →</span>
+      </a>
+    </div>`,
+
+  recursos : () => `
+    <h2>Recursos <span class="tag">Herramientas</span></h2>
+    <p class="lead">Herramientas de campo desarrolladas por la Unidad Técnica, listas para
+    usar desde el navegador e instalables como aplicación (PWA).</p>
+    <div class="grid">
+      <a class="card" href="${CONFIG.enlaces.satfinder}" ${CONFIG.enlaces.satfinder!=="#"?'target="_blank" rel="noopener"':''}>
+        <div class="icon">🧭</div>
+        <h3>Satfinder Bethel ${CONFIG.enlaces.satfinder==="#"?'<span class="badge soon">Enlace pendiente</span>':'<span class="badge ok">PWA</span>'}</h3>
+        <p>Calculadora de apuntamiento satelital con mapa, azimut, elevación e inclinómetro
+        integrado para instalar antenas parabólicas en campo.</p>
+        <span class="go">Abrir →</span>
+      </a>
+      <a class="card" href="${CONFIG.enlaces.gpscam}" target="_blank" rel="noopener">
+        <div class="icon">📷</div>
+        <h3>GPS Cam <span class="badge ok">PWA</span></h3>
+        <p>Cámara con sello de coordenadas GPS, fecha y hora para evidencia fotográfica de
+        trabajos en estaciones.</p>
+        <span class="go">Abrir →</span>
+      </a>
+      <a class="card" href="${CONFIG.enlaces.estaciones}" target="_blank" rel="noopener">
+        <div class="icon">📡</div>
+        <h3>Panel de Estaciones <span class="badge ok">PWA</span></h3>
+        <p>Monitoreo de la red con simulación de cobertura RF y reportes de estado.</p>
+        <span class="go">Abrir →</span>
+      </a>
+    </div>`,
+
+  descargas : () => `
+    <h2>Descargas <span class="tag">Apps</span></h2>
+    <p class="lead">Aplicaciones desarrolladas por la Unidad Técnica, disponibles para
+    descarga e instalación directa (APK / PWA).</p>
+    <div class="grid">
+      <a class="card" href="${CONFIG.enlaces.stbRemote}" ${CONFIG.enlaces.stbRemote!=="#"?'target="_blank" rel="noopener"':''}>
+        <div class="icon">🎛</div>
+        <h3>Control Remoto STB ${CONFIG.enlaces.stbRemote==="#"?'<span class="badge soon">Enlace pendiente</span>':'<span class="badge ok">APK</span>'}</h3>
+        <p>App Android que convierte tu teléfono con emisor IR en control remoto para
+        decodificadores satelitales (Aimsat, Digitalcom, Newland).</p>
+        <span class="go">Descargar →</span>
+      </a>
+      <div class="card">
+        <div class="icon">📦</div>
+        <h3>Más utilidades</h3>
+        <p>Próximamente: más herramientas de la Unidad Técnica disponibles para descarga.</p>
+        <span class="badge soon">Próximamente</span>
+      </div>
+    </div>`
+};
+
+/* =====================================================================
+   ROUTER DE PESTAÑAS (hash-based, enlaces compartibles)
+   ===================================================================== */
+const nav  = document.getElementById("tabs");
+const main = document.getElementById("main");
+
+TABS.forEach(t=>{
+  const b = document.createElement("button");
+  b.id = "tab-" + t.id;
+  b.setAttribute("role","tab");
+  b.innerHTML = `<span>${t.icon}</span>${t.label}`;
+  b.addEventListener("click", ()=>{ location.hash = t.id; });
+  nav.appendChild(b);
+
+  const s = document.createElement("section");
+  s.id = "sec-" + t.id;
+  main.appendChild(s);
+});
+
+function render(id){
+  if(!SECTIONS[id]) id = "home";
+  TABS.forEach(t=>{
+    document.getElementById("tab-"+t.id).classList.toggle("active", t.id===id);
+    const sec = document.getElementById("sec-"+t.id);
+    const on = t.id===id;
+    sec.classList.toggle("visible", on);
+    if(on && !sec.dataset.done){ sec.innerHTML = SECTIONS[t.id](); sec.dataset.done = "1"; bindSection(t.id); }
+  });
+  document.getElementById("tab-"+id).scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
+  window.scrollTo({top:0});
+}
+
+function bindSection(id){
+  if(id==="sintonia"){
+    document.getElementById("formSintonia").addEventListener("submit", ev=>{
+      ev.preventDefault();
+      const v = x => document.getElementById(x).value.trim();
+      const cuerpo =
+        "REPORTE DE SINTONÍA — Técnica Bethel\n" +
+        "------------------------------------\n" +
+        "Nombre: "  + v("fNombre") + "\n" +
+        "Ciudad: "  + v("fCiudad") + "\n" +
+        "Medio: "   + v("fMedio")  + "\n" +
+        "Canal/Frecuencia: " + v("fCanal") + "\n" +
+        "Estado: "  + v("fEstado") + "\n" +
+        "Detalle: " + v("fDetalle") + "\n" +
+        "Fecha: "   + new Date().toLocaleString("es-PE");
+      const url = "mailto:" + CONFIG.correoSoporte +
+        "?subject=" + encodeURIComponent("Reporte de sintonía — " + v("fCiudad")) +
+        "&body="    + encodeURIComponent(cuerpo);
+      location.href = url;
+    });
+  }
+}
+
+window.addEventListener("hashchange", ()=>render(location.hash.replace("#","")));
+render(location.hash.replace("#","") || "home");
+</script>
+</body>
+</html>
